@@ -1,34 +1,50 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { fetchNews } from './api/fetchNews';
+import { Grid } from '@material-ui/core';
+import { SearchBar, Article, ArticleList } from './components';
+
+import fetchNews from './api/fetchNews';
 import './App.css';
 
-const App = () => {
-    const [query, setQuery] = useState('');
-    const [articles, setArticles] = useState({});
-
-    const search = async (e) => {
-        if(e.key === 'Enter') {
-            const data = await fetchNews(query);
-
-            setArticles(data);
-            console.log(data);
-            setQuery('');
-        }
+class App extends React.Component {
+    
+    state = {
+        articles: [],
+        selectedArticle: null,
     }
 
-    return(
-        <div className="main-container">
-            <input type="text" className="search" placeholder="Search ..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyPress={search} />
-            {articles.articles && (
-                <div className="articles">
-                    <h2 className="article-title">
-                        <span>{articles.articles[0].title}</span>
-                    </h2>
-                </div>
-            )}
-        </div>
-    );
+    handleSubmit = async (SearchTearm) => {
+        const response = await fetchNews.get('everything', {
+            params: {
+                q: SearchTearm,
+                apiKey: 'e7204eacae514c33a4061be5b0dab50a',
+            }
+        });
+
+        console.log(response.data);
+
+        this.setState({ articles: response.data.articles, selectedArticle: response.data.articles[0] });
+    }
+
+    render () {   
+        const { selectedArticle, articles } = this.state; 
+        return(
+            <Grid justify="center" container spacing={10}>
+                <Grid item xs={12}>
+                    <Grid container spacing={10}>
+                        <Grid item xs={12}>
+                            <SearchBar onFormSubmit={this.handleSubmit} />
+                        </Grid>
+                        <Grid item xs={8}>
+                            <Article article={selectedArticle}/>
+                        </Grid>
+                        <Grid item xs={4}>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        )
+    }
 }
 
 export default App;
